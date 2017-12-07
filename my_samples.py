@@ -119,20 +119,20 @@ class animal():
 		self.color=color
 		self.kind=kind
 
-class animal():
+class Animal():
 		name="Whisper"
 		color="Red"
 		kind="Birds"
 
-class bird(animal):
+class Bird(animal):
 		size=20
 
 
-class bird(animal):
+class Bird(animal):
 	def __init__(self,size):
 		self.size=size
 
-dog=animal
+dog=Animal
 dog.color="red"
 
 
