@@ -41,3 +41,9 @@ class MessageUser():
 				self.messages.append(new_msg)
 			return self.messages
 		return []
+
+
+pizdez=MessageUser()
+pizdez.add_user("igor",23.4)
+pizdez.add_user("stePhan",2323.232)
+pizdez.add_user("YuREZS",2323.232,email="yura@rambler.ru")
