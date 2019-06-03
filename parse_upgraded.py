@@ -15,60 +15,76 @@ while True:
     best_buy_soup = BeautifulSoup(get_url.text, 'html.parser')
     products = best_buy_soup.findAll('li', {'class': 'sku-item'})
 
-    file_path = "bestbuy_{search_item}.txt".format(search_item=search_item)
+    file_path = "bestbuy_{search_item}2.txt".format(search_item=search_item)
     if len(products) < 1:
         break
     with open(file_path, "a", encoding='utf8') as textfile:
         products = best_buy_soup.findAll('li', {'class': 'sku-item'})
         for items in products:
-            product_name = items.findAll('h4', {'class': 'sku-header'})[0].text.replace('”', '"')
+            product_name = items.findAll('h4', {'class': 'sku-header'})[0].text.replace('”', '"').replace('–', '-')
             product_model = items.findAll('span', {'class': 'sku-value'})[0].text.replace(" ", "")
-            if search_item == "laptop":
+            if search_item == "laptop" or "pc desktop":
                 parsed_product_name = product_name.split(' - ')
-                brand = parsed_product_name[0]
+                brand = parsed_product_name[0].strip()
                 model = parsed_product_name[1]
-                proc_pattern = re.compile(r"(Intel\s\w*\s(\w?)(\d?))|(AMD+\s+\w*\s(\d?))")
-                color = parsed_product_name[-1]
-                hard_drive = ""
+                new_model = re.sub(r'\d+\.?\d?\"\s', '', model)
+                new_model2 = re.sub('\s*Laptop\s*','',new_model).strip()
+                string_to_search = parsed_product_name[1:-1]
+                proc_pattern = "AMD\sRyzen\s\w+|AMD\s\w+-\w+|Intel\s\w+\s?\w*"
+                video_pattern = "AMD Radeon[\s\w]+[^\s-]|NVIDIA[\s\w]+-?[^\s]"
+                screen_pattern = '\d+\.?\d?\"'
                 ram = ""
-                screen_size = re.search('\d+\.?\d?\"', product_name)
+                hard_drive = ""
+                lala = re.compile(screen_pattern)
+                hd_pattern = re.compile(r'(\d+GB)|(\d+TB)')
+                color = parsed_product_name[-1].strip()
+
+                screen_size = re.search(screen_pattern, product_name)
                 if bool(screen_size) == True:
-                    screen = screen_size.group()
+                    screen = screen_size.group().strip()
                 else:
                     screen = None
-                string_to_search = parsed_product_name[1:-1]
-                hd_pattern = re.compile(r'(\d+GB)|(\d+TB)')
+
                 print(product_name)
-                print(brand)
-                print(model)
-                print(screen)
+
+                processor_search = re.search(proc_pattern, product_name)
+                if bool(processor_search) == True:
+                    processor_name = processor_search.group().strip()
+                else:
+                    processor_name = None
+
+                video_search = re.search(video_pattern, product_name)
+                if bool(video_search) == True:
+                    video_name = video_search.group().replace(' -', '').strip()
+                else:
+                    video_name = None
+
                 for element in string_to_search:
                     if hd_pattern.search(element):
                         if "GB Memory" not in element:
-                            hard_drive = re.sub(r'\([\w\s]+\)', '', element)
+                            hard_drive = re.sub(r'\([\w\s]+\)', '', element).strip()
                             print(hard_drive)
+                            print(element)
                         else:
-                            ram = element
-                    if proc_pattern.search(element):
-                        ram = element
-                        print(ram)
-                # print(proc)
-                        # page_line = '"{brand}"\t"{screen}"\t"{hard_drive}"\t"{color}"\t"{product_model}"\n'.format(brand=brand, color=color, hard_drive=hard_drive,screen=screen, product_model=product_model)
-                        # textfile.write(page_line)
+                            ram = element.strip()
+                            print(element)
+                print(new_model2)
+                page_line = '"{brand}"\t"{screen}"\t"{model}"\t"{processor_name}"\t"{ram}"\t"{video}"\t"{hard_drive}"\t"{color}"\t"{product_model}"\n'.format(brand=brand, model= new_model2, video=video_name, color=color, processor_name=processor_name, ram=ram,hard_drive=hard_drive,screen=screen, product_model=product_model, product_name=product_name)
 
-            # elif search_item == "tv":
-            #     parsed_product_name = product_name.split(' - ')
-            #     print(parsed_product_name)
-            #     brand = parsed_product_name[0]
-            #     screen_size = parsed_product_name[1].replace(' Class', '')
-            #     tv_class = parsed_product_name[3]
-            #     tv_series = parsed_product_name[4]
-            #     # tv_resolution = parsed_product_name[5+]
-            #     page_line = '"{brand}"\t"{screen_size}"\t"{tv_class}"\t"{tv_series}"\n'.format(brand=brand,screen_size=screen_size,tv_class=tv_class,tv_series=tv_series)
-            #     textfile.write(page_line)
+
+            elif search_item == "tv":
+                parsed_product_name = product_name.split(' - ')
+                print(parsed_product_name)
+                brand = parsed_product_name[0]
+                screen_size = parsed_product_name[1].replace(' Class', '')
+                tv_class = parsed_product_name[3]
+                tv_series = parsed_product_name[4]
+                # tv_resolution = parsed_product_name[5+]
+                page_line = '"{brand}"\t"{screen_size}"\t"{tv_class}"\t"{tv_series}"\n'.format(brand=brand,screen_size=screen_size,tv_class=tv_class,tv_series=tv_series)
+                textfile.write(page_line)
             else:
                 page_line = '"{product_name}"\t"{product_model}"\n'.format(product_name=product_name, product_model=product_model)
-                textfile.write(page_line)
+        textfile.write(page_line)
 
 
 
