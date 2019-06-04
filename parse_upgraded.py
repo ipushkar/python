@@ -17,23 +17,29 @@ def quick_search(pattern, search_in_string):
 
 while True:
 
-    base_url = "https://www.bestbuy.com/site/searchpage.jsp" + "?st=" + search_item + "&_dyncharset=UTF-8&id=pcat17071&type=page&sc=Global" + "&cp=" + str(
-        page) + "&nrp=&sp=&qp=&list=n&af=true&iht=y&usc=All+Categories&ks=960&keys=keys"
+    base_url = "https://www.bestbuy.com/site/searchpage.jsp" + "?st=" + search_item + "&_dyncharset=UTF-8&id=pcat17071&type=page&sc=Global" + "&cp=" + str(page) \
+               + "&nrp=&sp=&qp=&list=n&af=true&iht=y&usc=All+Categories&ks=960&keys=keys"
     if search_item == "tablet":
-        base_url = "https://www.bestbuy.com/site/ipad-tablets-ereaders/tablets/pcmcat209000050008.c?cp=" + str(
-            page) + "&id=pcmcat209000050008"
+        base_url = "https://www.bestbuy.com/site/ipad-tablets-ereaders/tablets/pcmcat209000050008.c?cp=" + str(page) + "&id=pcmcat209000050008"
     elif search_item == "desktop pc":
-        base_url = "https://www.bestbuy.com/site/searchpage.jsp" + "?st=" + search_item + "&_dyncharset=UTF-8&id=pcat17071&type=page&sc=Global" + "&cp=" + str(
-            page) + "&nrp=&sp=&qp=category_facet%3DSAAS~All+Desktops~pcmcat143400050013&list=n&af=true&iht=y&usc=All+Categories&ks=960&keys=keys"
+        base_url = "https://www.bestbuy.com/site/searchpage.jsp" + "?st=" + search_item + "&_dyncharset=UTF-8&id=pcat17071&type=page&sc=Global" + "&cp=" \
+                   + str(page) + "&nrp=&sp=&qp=category_facet%3DSAAS~All+Desktops~pcmcat143400050013&list=n&af=true&iht=y&usc=All+Categories&ks=960&keys=keys"
+    elif search_item == "smartwatch":
+        base_url = "https://www.bestbuy.com/site/searchpage.jsp?_dyncharset=UTF-8&cp="+str(page)+"&id=pcat17071&iht=y&intl=nosplash&keys=keys&ks=960&list=n&qp=category_facet%3DAll%20Smartwatches~pcmcat321000050004&sc=Global&st="+search_item+"&type=page&usc=All%20Categories"
+    elif search_item == "photo camera":
+        base_url = "https://www.bestbuy.com/site/digital-cameras/mirrorless-cameras/pcmcat214000050005.c?cp="+str(page)+"&id=pcmcat214000050005"
+        # base_url = "https://www.bestbuy.com/site/searchpage.jsp?id=pcat17071&nrp=15&cp=1&sp=-bestsellingsort%20skuidsaas&seeAll=&ks=960&sc=Global&list=y&usc=All%20Categories&type=page&iht=n&browsedCategory=pcmcat186400050004&st=pcmcat186400050004_categoryid%24abcat0401005&qp=features_facet%3DFeatures~Camera%20Full%20Frame%20Sensor"
+        # base_url = "https://www.bestbuy.com/site/digital-slr-cameras/all-dslrs/pcmcat186400050004.c?cp="+str(page)+"&id=pcmcat186400050004"
+    url_new = "https://www.bestbuy.com/site/searchpage.jsp?_dyncharset=UTF-8"+"&cp=" + \
+              str(page)+"&id=pcat17071&iht=y&keys=keys&ks=960&list=n&qp=category_facet%3DUnlocked%20Cell%20Phones~pcmcat156400050037&sc=Global&st=" + search_item+"&type=page&usc=All%20Categories"
 
-    url_new = "https://www.bestbuy.com/site/searchpage.jsp?_dyncharset=UTF-8"+"&cp=" + str(page)+"&id=pcat17071&iht=y&keys=keys&ks=960&list=n&qp=category_facet%3DUnlocked%20Cell%20Phones~pcmcat156400050037&sc=Global&st="+search_item+"&type=page&usc=All%20Categories"
     get_url = requests.get(base_url, headers=headers, timeout=5)
     print(get_url.status_code)
     print(base_url)
     best_buy_soup = BeautifulSoup(get_url.text, 'html.parser')
     products = best_buy_soup.findAll('li', {'class': 'sku-item'})
 
-    file_path = "bestbuy_{search_item}_updated2.txt".format(search_item=search_item)
+    file_path = "bestbuy_{search_item}.txt".format(search_item=search_item)
     if len(products) < 1:
         break
     with open(file_path, "a", encoding='utf8') as textfile:
@@ -104,10 +110,13 @@ while True:
                                         model_number=product_model)
                 textfile.write(page_line)
 
-
-
             else:
-                page_line = '"{product_name}"\t"{product_model}"\n'.format(product_name=product_name, product_model=product_model)
+                parsed_product_name = product_name.split(' - ')
+                print(product_name)
+                page_line = '"{product_brand}"\t"{product_name}"\t"{color}"\t"{product_model}"\n'.format(product_brand=parsed_product_name[0],
+                                                                                                         product_name=parsed_product_name[1].replace('Refurbished','').replace('®','').strip(),
+                                                                                                         color=parsed_product_name[-1],
+                                                                                                         product_model=product_model)
                 textfile.write(page_line)
 
     page = page + 1
