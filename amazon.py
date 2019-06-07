@@ -8,7 +8,7 @@ headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 
 while True:
 
-    base_url = "https://www.digitaltrends.com/laptop-reviews/page/"+str(page)+"/"
+    base_url = "https://www.consumerreports.org/products/laptop/ratings-overview/"
 
     get_url = requests.get(base_url, timeout=5)
     print(get_url.status_code)
@@ -16,18 +16,18 @@ while True:
     best_buy_soup = BeautifulSoup(get_url.text, 'html.parser')
     products = best_buy_soup.findAll('div', {'class': 'item'})
 
-    items = best_buy_soup.findAll('div', {'class': 'meta'})
+    items = best_buy_soup.findAll('tr', {'class': 'row-border'})
     for name in items:
-        product_name = name.findAll('h3', {'class': 'title'})[0]
+        product_name = name.findAll('a', {'class': 'crux-product-title'})[0]
         # print(product_name.text)
 
-    file_path = "bestbuy_{search_item}_.txt".format(search_item=search_item)
+    file_path = "bestbuy_{search_item}__.txt".format(search_item=search_item)
     if len(products) < 1:
         break
     with open(file_path, "a", encoding='utf8') as textfile:
-        products = best_buy_soup.findAll('div', {'class': 'meta'})
+        products = best_buy_soup.findAll('tr', {'class': 'row-border'})
         for items in products:
-            product_name = items.findAll('h3', {'class': 'title'})[0].text.strip().replace('Review','')
+            product_name = items.findAll('a', {'class': 'crux-product-title'})[0].text.strip()
             print(product_name)
             parsed_product_name = product_name.split(' ')
             print(parsed_product_name)
